@@ -11,12 +11,20 @@
 
 using namespace std;
 
+	void Polar::PrintVolume() {
+		for (int i = 1; i < Mx + 1; ++i)
+			cout << square_front[i] << " ";
+	};
 
-	void Polar::TranspositionPolar() {
+
+	void Polar::TranspositionPolar(vector<vector<double>> & lambda_bb, vector<vector<double>> & lambda_bn,
+		vector<vector<double>> & lambda_nb, vector<vector<double>> & lambda_nn, vector<vector<double>> & lambda_nf,
+		vector<vector<double>> & lambda_bf, vector<vector<double>> &lambda_fb, vector<vector<double>> & lambda_fn, vector<vector<double>> & lambda_ff) {
 		for (int i = 1; i < Mx + 1; ++i) {
 			for (int j = 1; j < My + 1; ++j) {
 				lambda_bb[i][j] = 0.0;
 				lambda_bn[i][j] = square_front[i - 1] / volume[i][j] * 1.0 / 6.0;
+				cout << square_front[i - 1] << " "<<volume[i][j] << " " << lambda_bb[i][j]<<endl;
 				lambda_bf[i][j] = 0.0;
 
 				lambda_fb[i][j] = 0.0;
@@ -101,8 +109,9 @@ void Geometry::Print(int Mx, int My) {
 
 
 
-	void System::GetValue(int Mx, int My, int N, double theta, double xmin,
+	void System::GetValue(int Mx, int My, int N, int M, double theta, double xmin,
 		double xmax, double ymin, double ymax) {
+		this->M = M;
 		this->Mx = Mx;
 		this->My = My;
 		this->N = N;
@@ -126,6 +135,7 @@ void Geometry::Print(int Mx, int My) {
 
 
 	void SCF::MemoryVectors() {
+		A.assign(M, vector<double>(M, 0));
 		grad.assign(M+2, 0);
 		direction.assign(M + 2, 0);
 		alpha.assign(M + 2, 0);
@@ -134,8 +144,8 @@ void Geometry::Print(int Mx, int My) {
 		fi_p.assign(Mx + 2, vector<double>(My + 2, 0));
 		fi_w.assign(Mx + 2, vector<double>(My + 2, 0));
 		G.assign(Mx + 2, vector<double>(My + 2, 0));
-		Gforw.assign(Mx + 1, vector <vector<double>>(My + 1, vector<double>(N + 1, 0)));
-		Gback.assign(Mx + 1, vector <vector<double>>(My + 1, vector<double>(N + 1, 0)));
+		Gforw.assign(Mx + 2, vector <vector<double>>(My + 2, vector<double>(N + 2, 0)));
+		Gback.assign(Mx + 2, vector <vector<double>>(My + 2, vector<double>(N + 2, 0)));
 	};
 
 	
@@ -150,8 +160,9 @@ void Geometry::Print(int Mx, int My) {
 		return G;
 	};
 
-	vector3d SCF::FindGforw(Geometry& lambda_bb, Geometry& lambda_bn, Geometry& lambda_nb, Geometry& lambda_nn,
-		Geometry& lambda_nf, Geometry& lambda_bf, Geometry &lambda_fb, Geometry & lambda_fn, Geometry & lambda_ff) {
+	vector3d SCF::FindGforw(vector<vector<double>> & lambda_bb, vector<vector<double>> & lambda_bn, vector<vector<double>> & lambda_nb, 
+		vector<vector<double>> & lambda_nn, vector<vector<double>> & lambda_nf, vector<vector<double>> & lambda_bf, 
+		vector<vector<double>> &lambda_fb, vector<vector<double>> & lambda_fn, vector<vector<double>> & lambda_ff) {
 		for (int i = xmin; i < xmax + 1; ++i) {
 			for (int k = ymin; k < ymax + 1; ++k) {
 				Gforw[i][k][0] = G[i][k];
@@ -179,8 +190,9 @@ void Geometry::Print(int Mx, int My) {
 
 	};
 
-	vector3d SCF::FindGback(Geometry& lambda_bb, Geometry& lambda_bn, Geometry& lambda_nb, Geometry& lambda_nn,
-		Geometry& lambda_nf, Geometry& lambda_bf, Geometry &lambda_fb, Geometry & lambda_fn, Geometry & lambda_ff) {
+	vector3d SCF::FindGback(vector<vector<double>> & lambda_bb, vector<vector<double>> & lambda_bn, vector<vector<double>> & lambda_nb, 
+		vector<vector<double>> & lambda_nn, vector<vector<double>> & lambda_nf, vector<vector<double>> & lambda_bf, 
+		vector<vector<double>> & lambda_fb, vector<vector<double>> & lambda_fn, vector<vector<double>> & lambda_ff) {
 
 		for (int i = 1; i < Mx + 1; ++i) {
 			for (int k = 1; k < My + 1; ++k) {
@@ -208,7 +220,7 @@ void Geometry::Print(int Mx, int My) {
 		return Gback;
 	};
 
-	double SCF::FindQ(Polar &volume){
+	double SCF::FindQ(vector<vector<double>> & volume){
 
 		double sum = 0, q = 0;
 		for (int i = 1; i < Mx + 1; ++i) {
@@ -254,4 +266,12 @@ void Geometry::Print(int Mx, int My) {
 				grad[i * (My + 2) + k] = -1 + 1.0 / (fi_p[i][k] + fi_w[i][k]);
 		}
 		return grad;
+	};
+
+
+	void SCF::Print(){
+		for (int i = 1; i < M + 1; ++i) {
+			cout << grad[i] << " ";
+		}
+
 	};
