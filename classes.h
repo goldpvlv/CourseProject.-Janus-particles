@@ -75,9 +75,12 @@ public:
 	void GetValue(int Mx, int My,int N,int M,double theta, double xmin,
 		double xmax, double ymin, double ymax);
 	void SingularMatrix();
+	vector < double >  FindDirection();
+	void LengthOfGrad();
+	vector < vector < double > > Formula();
 
 	int Mx, My, N, M;
-	double theta, xmin, xmax, ymin, ymax;
+	double theta, xmin, xmax, ymin, ymax, length_of_grad;
 	double teta = N * theta;
 };
 

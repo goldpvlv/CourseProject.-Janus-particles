@@ -275,3 +275,104 @@ void Geometry::Print(int Mx, int My) {
 		}
 
 	};
+	vector < double >  product_matrix_on_vector(vector < vector < double > >A, vector <double> grad, int M) {
+		vector <double> a(M, 0);
+
+		for (int i = 0; i < M; i++) {
+			a[i] = 0;
+			for (int j = 0; j < M; j++) {
+				a[i] += A[i][j] * grad[j];
+			}
+		}
+
+		return a;
+	}
+
+	vector < double >  System::FindDirection() {
+	
+		direction = product_matrix_on_vector(A, grad, M);
+
+		for (int i = 0; i < M; i++)
+			direction[i] = -1 * direction[i];
+		return direction;
+	
+	};
+
+	vector < vector < double > > product(vector < vector < double > > A, vector < vector < double > > U, int N) {
+		vector < vector < double > > c(N, vector<double>(N, 0));
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				c[i][j] = 0;
+				for (int t = 0; t < N; t++)
+					c[i][j] += A[i][t] * U[t][j];
+			}
+		}
+		return c;
+	}
+
+	vector < vector < double > > make_matrix(vector <double> a, vector <double> b, int M) {
+		vector < vector < double > > matrix(M, vector<double>(M, 0));
+		for (int i = 0; i < M; i++) {
+			for (int j = 0; j < M; j++)
+				matrix[i][j] = a[i] * b[j];
+		}
+		return matrix;
+	}
+
+
+	double make_number(vector <double> a, vector <double> b, int N) {
+		double number = 0;
+		for (int i = 0; i < N; i++)
+			number += a[i] * b[i];
+		return number;
+	}
+
+
+
+	vector < vector < double > > division_matrix_by_number(vector < vector < double > > matrix, double number, int N) {
+		vector < vector < double > > matrix1(N, vector<double>(N, 0));
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++)
+				matrix1[i][j] = matrix[i][j] / number;
+		}
+		return matrix1;
+	}
+
+	vector < vector < double > > System::Formula() {
+		double number1 = 0, number2 = 0;
+		vector < vector < double > > matrix1(M, vector<double>(M, 0));
+		vector < vector < double > > matrix2(M, vector<double>(M, 0));
+		vector < vector < double > > B(M, vector<double>(M, 0));
+		vector < vector < double > > C(M, vector<double>(M, 0));
+		vector <double> a(M, 0);
+		vector <double> b(M, 0);
+		matrix1 = make_matrix(alpha, alpha, M);
+		number1 = make_number(alpha, beta, M);
+		B = division_matrix_by_number(matrix1, number1, M);
+		a = product_matrix_on_vector(A, beta, M);
+		matrix2 = make_matrix(a, beta, M);
+		matrix2 = product(matrix2, A, M);
+		b = product_matrix_on_vector(A, beta, M);
+		number2 = make_number(b, beta, M);
+		C = division_matrix_by_number(matrix2, number2, M);
+
+		for (int i = 0; i < M; i++) {
+			for (int j = 0; j < M; j++)
+				A[i][j] = A[i][j] + B[i][j] - C[i][j];
+		}
+
+		return A;
+	
+	};
+
+	void System::LengthOfGrad() {
+	
+		double sum = 0;
+		for (int i = 0; i < M; ++i) {
+			sum += grad[i] * grad[i];
+		}
+		length_of_grad = sqrt(sum);
+
+	};
+
+
