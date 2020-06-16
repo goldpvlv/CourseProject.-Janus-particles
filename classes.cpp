@@ -11,39 +11,8 @@
 
 using namespace std;
 
-	void Polar::PrintVolume() {
-		for (int i = 1; i < Mx + 1; ++i)
-			cout << square_front[i] << " ";
-	};
 
-
-	void Polar::TranspositionPolar(vector<vector<double>> & lambda_bb, vector<vector<double>> & lambda_bn,
-		vector<vector<double>> & lambda_nb, vector<vector<double>> & lambda_nn, vector<vector<double>> & lambda_nf,
-		vector<vector<double>> & lambda_bf, vector<vector<double>> &lambda_fb, vector<vector<double>> & lambda_fn, vector<vector<double>> & lambda_ff) {
-		for (int i = 1; i < Mx + 1; ++i) {
-			for (int j = 1; j < My + 1; ++j) {
-				lambda_bb[i][j] = 0.0;
-				lambda_bn[i][j] = square_front[i - 1] / volume[i][j] * 1.0 / 6.0;
-				cout << square_front[i - 1] << " "<<volume[i][j] << " " << lambda_bb[i][j]<<endl;
-				lambda_bf[i][j] = 0.0;
-
-				lambda_fb[i][j] = 0.0;
-				lambda_fn[i][j] = square_front[i] / volume[i][j] * 1.0 / 6.0;
-				lambda_ff[i][j] = 0.0;
-
-
-				double prob = 1.0 - lambda_bn[i][j] - lambda_fn[i][j] - 1.0 / 6.0 * square_front[i] / volume[i][j] - 1.0 / 6.0 * square_front[i - 1] / volume[i][j];
-				double sum = 2.0 * (square_side[i] + volume[i][j]);
-
-				lambda_nb[i][j] = prob * square_side[i] / sum;
-				lambda_nn[i][j] = prob * 2.0 * volume[i][j] / sum;
-				lambda_nf[i][j] = prob * square_side[i] / sum;
-
-			}
-		}
-	}
-
-void Geometry::Print(int Mx, int My) {
+void Geometry::Print() {
 
 	for (int i = 0; i < Mx; ++i) {
 		for (int j = 0; j < My; ++j) {
@@ -53,49 +22,96 @@ void Geometry::Print(int Mx, int My) {
 	}
 	}
 
-	void Geometry::AllocateMemory(int x, int y) {
-		lambda_bb.assign(x+2, vector<double>(y+2, 0));
-		lambda_bn.assign(x+2, vector<double>(y+2, 0));
-		lambda_bf.assign(x+2, vector<double>(y+2, 0));
-		lambda_fb.assign(x+2, vector<double>(y+2, 0));
-		lambda_fn.assign(x+2, vector<double>(y+2, 0));
-		lambda_ff.assign(x+2, vector<double>(y+2, 0));
-		lambda_nb.assign(x+2, vector<double>(y+2, 0));
-		lambda_nn.assign(x+2, vector<double>(y+2, 0));
-		lambda_nf.assign(x+2, vector<double>(y+2, 0));	
+	void Geometry::AllocateMemory() {
+		lambda_bb.assign(Mx+2, vector<double>(My+2, 0));
+		lambda_bn.assign(Mx+2, vector<double>(My+2, 0));
+		lambda_bf.assign(Mx+2, vector<double>(My+2, 0));
+		lambda_fb.assign(Mx+2, vector<double>(My+2, 0));
+		lambda_fn.assign(Mx+2, vector<double>(My+2, 0));
+		lambda_ff.assign(Mx+2, vector<double>(My+2, 0));
+		lambda_nb.assign(Mx+2, vector<double>(My+2, 0));
+		lambda_nn.assign(Mx+2, vector<double>(My+2, 0));
+		lambda_nf.assign(Mx+2, vector<double>(My+2, 0));	
+		volume.assign(Mx + 2, vector<double>(My + 2, 0));;
+		square_side.assign(Mx + 2, vector<double>(My + 2, 0));
+		square_up.assign(Mx + 2, vector<double>(My + 2, 0));
+		square_front.assign(Mx + 2, vector<double>(My + 2, 0));
+		square_right.assign(Mx + 2, vector<double>(My + 2, 0));;
+		square_left.assign(Mx + 2, vector<double>(My + 2, 0));;
 		
 	};
 
 	
-	void Polar::MemoryVectors() {
-
-		volume.assign(Mx + 2, vector<double>(My + 2, 0));;
-		square_side.assign(Mx+2,0);
-		square_up.assign(Mx+2,0);
-		square_front.assign(Mx+2,0);
-
-	}
-	
-	void Polar::GetValue(int Mx, int My) {
+	void Geometry::GetValue(int Mx, int My, int N) {
 		this->Mx = Mx;
 		this->My = My;
+		this->N = N;
+	}
+
+
+	void Polar::PrintVolume() {
+		for (int i = 1; i < Mx + 1; ++i) {
+			for (int j = 1; j < My + 1; ++j) {
+				cout << volume[i][j] << " ";
+			}
+			cout << endl;
+		}
+	};
+
+
+	void Polar::Transposition(vector<vector<double>> & lambda_bb, vector<vector<double>> & lambda_bn,
+		vector<vector<double>> & lambda_nb, vector<vector<double>> & lambda_nn, vector<vector<double>> & lambda_nf,
+		vector<vector<double>> & lambda_bf, vector<vector<double>> &lambda_fb, vector<vector<double>> & lambda_fn,
+		vector<vector<double>> & lambda_ff, vector<vector<double>> & volume, vector<vector<double>> & square_up,
+		vector<vector<double>> & square_side, vector<vector<double>> & square_front) {
+
+		for (int i = 1; i < Mx + 1; ++i) {
+			for (int j = 1; j < My + 1; ++j) {
+				lambda_bb[i][j] = 0.0;
+				lambda_bn[i][j] = square_front[i - 1][j] / volume[i][j] * 1.0 / 6.0;
+				cout << square_front[i - 1][j] << " " << volume[i][j] << " " << lambda_bb[i][j] << endl;
+				lambda_bf[i][j] = 0.0;
+
+				lambda_fb[i][j] = 0.0;
+				lambda_fn[i][j] = square_front[i][j] / volume[i][j] * 1.0 / 6.0;
+				lambda_ff[i][j] = 0.0;
+
+
+				double prob = 1.0 - lambda_bn[i][j] - lambda_fn[i][j] - 1.0 / 6.0 * square_front[i][j] / volume[i][j] - 1.0 / 6.0 * square_front[i - 1][j] / volume[i][j];
+				double sum = 2.0 * (square_side[i][j] + volume[i][j]);
+
+				lambda_nb[i][j] = prob * square_side[i][j] / sum;
+				lambda_nn[i][j] = prob * 2.0 * volume[i][j] / sum;
+				lambda_nf[i][j] = prob * square_side[i][j] / sum;
+
+			}
+		}
 	}
 
 	void Polar::UpdateSquareFront() {
-		for (int i = 1; i < Mx + 1; ++i)
-			square_front[i] = 0.5*My*(i *i - (i - 1) * (i - 1));
+		for (int i = 1; i < Mx + 1; ++i) {
+			for (int j = 1; j < My + 1; ++j) {
+				square_front[i][j] = 0.5*My*(i *i - (i - 1) * (i - 1));
+			}
+		}
 	}
 
 	void Polar::UpdateSquareSide() {
 		int delta_h = 1;
-		for (int i = 1; i < Mx + 1; ++i)
-			square_side[i] = delta_h * (i *i - (i - 1) * (i - 1));
+		for (int i = 1; i < Mx + 1; ++i) {
+			for (int j = 1; j < My + 1; ++j) {
+				square_side[i][j] = delta_h * (i *i - (i - 1) * (i - 1));
+			}
+		}
 	}
 
 	void Polar::UpdateSquareUp() {
 		int delta_h = 1;
-		for (int i = 1; i < Mx + 1; ++i)
-			square_up[i] = delta_h * i * My;
+		for (int i = 1; i < Mx + 1; ++i) {
+			for (int j = 1; j < My + 1; ++j) {
+				square_up[i][j] = delta_h * i * My;
+			}
+		}
 	}
 
 	void Polar::UpdateVolume() {
@@ -107,11 +123,89 @@ void Geometry::Print(int Mx, int My) {
 		}
 	}
 
+	void Torus::UpdateSquareFront() {
 
 
-	void System::GetValue(int Mx, int My, int N, int M, double theta, double xmin,
-		double xmax, double ymin, double ymax) {
-		this->M = M;
+		for (int i = 1; i < Mx + 1; i++)
+			for (int j = 1; j < My + 1; j++) {
+				square_front[i][j] = i * delta_alpha * 2.0 * pi*(N + i * cos((2 * j - 1)*delta_alpha) / 2.0);
+			}
+
+	}
+
+	void Torus::UpdateVolume() {
+		vector <double> rho(Mx + 1, 0);
+
+		for (int i = 1; i < Mx + 1; ++i) {
+			rho[i] = 0.67*(2 * i - 1);
+		}
+
+		for (int i = 1; i < Mx + 1; i++) {
+			for (int j = 1; j < My + 1; j++) {
+				volume[i][j] = square_up[i][j] * pi * 2.0*(N + rho[i] * cos(((2 * j - 1) / 2.0)*delta_alpha));
+			}
+		}
+	
+	};
+
+	void Torus::UpdateSquareUp() {
+
+		for (int i = 1; i < Mx + 1; i++)
+			for (int j = 1; j < My + 1; j++) {
+				square_up[i][j] = delta_alpha / 2.0*(i *i - (i - 1) * (i - 1)); 
+			}
+	};
+
+	void Torus::UpdateSquareRight() {
+
+		for (int i = 1; i < Mx + 1; i++)
+			for (int j = 1; j < My + 1; j++) {
+				square_right[i][j] = (i - (i - 1)) * 2.0 * pi*(N + ((2 * i - 1) / 2.0 * cos(j*delta_alpha)));
+			}
+
+	};
+
+	void Torus::UpdateSquareLeft() {
+
+		for (int i = 1; i < Mx + 1; i++)
+			for (int j = 1; j < My + 1; j++) {
+				square_left[i][j] = (i - (i - 1)) * 2.0 * pi*(N + ((2 * i - 1) / 2.0*cos((j - 1)*delta_alpha)));
+			}
+
+	};
+
+	void Torus::Transposition(vector<vector<double>> & lambda_bb, vector<vector<double>> & lambda_bn,
+		vector<vector<double>> & lambda_nb, vector<vector<double>> & lambda_nn, vector<vector<double>> & lambda_nf,
+		vector<vector<double>> & lambda_bf, vector<vector<double>> &lambda_fb, vector<vector<double>> & lambda_fn,
+		vector<vector<double>> & lambda_ff, vector<vector<double>> & volume, vector<vector<double>> & square_up,
+		vector<vector<double>> & square_left, vector<vector<double>> & square_right,  vector<vector<double>> & square_front) {
+	
+		for (int i = 1; i < Mx + 1; ++i) {
+			for (int j = 1; j < My + 1; ++j) {
+				lambda_bb[i][j] = 0;
+				lambda_bn[i][j] = square_front[i - 1][j] / volume[i][j] * 1.0 / 6.0;
+				lambda_bf[i][j] = 0.0;
+
+				lambda_fb[i][j] = 0.0;
+				lambda_fn[i][j] = square_front[i][j] / volume[i][j] * 1.0 / 6.0;
+				lambda_ff[i][j] = 0.0;
+
+
+				double prob = 1.0 - 1.0 / 6.0 * square_front[i - 1][j] / volume[i][j] - 1.0 / 6.0 * square_front[i - 1][j] / volume[i][j];
+				double sum = square_left[i][j] + square_right[i][j] + 2 * volume[i][j];
+
+				lambda_nb[i][j] = prob * square_left[i][j] / sum;
+				lambda_nn[i][j] = prob * 2.0 * volume[i][j] / sum;
+				lambda_nf[i][j] = prob * square_right[i][j] / sum;
+
+			}
+		}
+	
+	};
+
+
+	void Molecule::GetValue(int Mx, int My, int N, double theta, double xmin, double xmax, double ymin, double ymax) {
+
 		this->Mx = Mx;
 		this->My = My;
 		this->N = N;
@@ -123,24 +217,8 @@ void Geometry::Print(int Mx, int My) {
 	};
 
 
-	void System::SingularMatrix() {
-		for (int i = 0; i < M; ++i) {
-			for (int j = 0; j < M; ++j) {
-				if (i == j)
-					A[i][j] = 1;
-				else A[i][j] = 0;
-			}
-		}
-	};
+	void Molecule::MemoryVectors() {
 
-
-	void SCF::MemoryVectors() {
-		A.assign(M, vector<double>(M, 0));
-		grad.assign(M+2, 0);
-		direction.assign(M + 2, 0);
-		alpha.assign(M + 2, 0);
-		beta.assign(M+2, 0);
-		u.assign(M + 2, 0);
 		fi_p.assign(Mx + 2, vector<double>(My + 2, 0));
 		fi_w.assign(Mx + 2, vector<double>(My + 2, 0));
 		G.assign(Mx + 2, vector<double>(My + 2, 0));
@@ -149,7 +227,7 @@ void Geometry::Print(int Mx, int My) {
 	};
 
 	
-	vector <vector <double>> SCF::FindG() {
+	vector <vector <double>> Molecule::FindG(vector <double> & u) {
 
 		for (int i = 0; i < Mx + 1; ++i) {
 			for (int j = 0; j < My + 1; ++j) {
@@ -160,7 +238,7 @@ void Geometry::Print(int Mx, int My) {
 		return G;
 	};
 
-	vector3d SCF::FindGforw(vector<vector<double>> & lambda_bb, vector<vector<double>> & lambda_bn, vector<vector<double>> & lambda_nb, 
+	vector3d Molecule::FindGforw(vector<vector<double>> & lambda_bb, vector<vector<double>> & lambda_bn, vector<vector<double>> & lambda_nb, 
 		vector<vector<double>> & lambda_nn, vector<vector<double>> & lambda_nf, vector<vector<double>> & lambda_bf, 
 		vector<vector<double>> &lambda_fb, vector<vector<double>> & lambda_fn, vector<vector<double>> & lambda_ff) {
 		for (int i = xmin; i < xmax + 1; ++i) {
@@ -190,7 +268,7 @@ void Geometry::Print(int Mx, int My) {
 
 	};
 
-	vector3d SCF::FindGback(vector<vector<double>> & lambda_bb, vector<vector<double>> & lambda_bn, vector<vector<double>> & lambda_nb, 
+	vector3d Molecule::FindGback(vector<vector<double>> & lambda_bb, vector<vector<double>> & lambda_bn, vector<vector<double>> & lambda_nb, 
 		vector<vector<double>> & lambda_nn, vector<vector<double>> & lambda_nf, vector<vector<double>> & lambda_bf, 
 		vector<vector<double>> & lambda_fb, vector<vector<double>> & lambda_fn, vector<vector<double>> & lambda_ff) {
 
@@ -220,7 +298,7 @@ void Geometry::Print(int Mx, int My) {
 		return Gback;
 	};
 
-	double SCF::FindQ(vector<vector<double>> & volume){
+	double Molecule::FindQ(vector<vector<double>> & volume){
 
 		double sum = 0, q = 0;
 		for (int i = 1; i < Mx + 1; ++i) {
@@ -235,7 +313,7 @@ void Geometry::Print(int Mx, int My) {
 		return q;
 	};
 
-	vector <vector<double>> SCF::FindFiP() {
+	vector <vector<double>> Molecule::FindFiP() {
 		double sum, teta = theta * N;
 		for (int i = 1; i < Mx + 1; ++i) {
 			for (int k = 1; k < My + 1; ++k) {
@@ -249,7 +327,7 @@ void Geometry::Print(int Mx, int My) {
 		return fi_p;
 	};
 
-	vector <vector<double>> SCF::FindFiW() {
+	vector <vector<double>> Molecule::FindFiW() {
 
 		for (int i = 1; i < Mx + 1; ++i) {
 			for (int j = 1; j < My + 1; ++j)
@@ -259,7 +337,7 @@ void Geometry::Print(int Mx, int My) {
 		return fi_w;
 	};
 
-	vector <double> SCF::FindGrad() {
+	vector <double> System::FindGrad(vector < vector < double > > &fi_p, vector < vector < double > > &fi_w) {
 		vector <double> grad(M + 1, 0);
 		for (int i = 1; i < Mx + 1; ++i) {
 			for (int k = 1; k < My + 1; ++k)
@@ -269,24 +347,34 @@ void Geometry::Print(int Mx, int My) {
 	};
 
 
-	void SCF::Print(){
-		for (int i = 1; i < M + 1; ++i) {
-			cout << grad[i] << " ";
-		}
+	
 
+	void System::GetValue(int Mx, int My) {
+		this -> Mx = Mx;
+		this -> My = My;
+	
 	};
-	vector < double >  product_matrix_on_vector(vector < vector < double > >A, vector <double> grad, int M) {
-		vector <double> a(M, 0);
 
-		for (int i = 0; i < M; i++) {
-			a[i] = 0;
-			for (int j = 0; j < M; j++) {
-				a[i] += A[i][j] * grad[j];
+
+	void System::MemoryVectors() {
+		grad.assign(M + 2, 0);
+		u.assign(M + 2, 0);
+		direction.assign(M + 2, 0);
+		alpha.assign(M + 2, 0);
+		beta.assign(M + 2, 0);
+		A.assign(M, vector<double>(M, 0));
+	};
+
+
+	void System::SingularMatrix() {
+		for (int i = 0; i < M; ++i) {
+			for (int j = 0; j < M; ++j) {
+				if (i == j)
+					A[i][j] = 1;
+				else A[i][j] = 0;
 			}
 		}
-
-		return a;
-	}
+	};
 
 	vector < double >  System::FindDirection() {
 	
@@ -297,6 +385,66 @@ void Geometry::Print(int Mx, int My) {
 		return direction;
 	
 	};
+
+
+	vector < vector < double > > System::Formula() {
+		double number1 = 0, number2 = 0;
+		vector < vector < double > > matrix1(M, vector<double>(M, 0));
+		vector < vector < double > > matrix2(M, vector<double>(M, 0));
+		vector < vector < double > > B(M, vector<double>(M, 0));
+		vector < vector < double > > C(M, vector<double>(M, 0));
+		vector <double> a(M, 0);
+		vector <double> b(M, 0);
+		matrix1 = make_matrix(alpha, alpha, M);
+		number1 = make_number(alpha, beta, M);
+		B = division_matrix_by_number(matrix1, number1, M);
+		a = product_matrix_on_vector(A, beta, M);
+		matrix2 = make_matrix(a, beta, M);
+		matrix2 = product(matrix2, A, M);
+		b = product_matrix_on_vector(A, beta, M);
+		number2 = make_number(b, beta, M);
+		C = division_matrix_by_number(matrix2, number2, M);
+
+		for (int i = 0; i < M; i++) {
+			for (int j = 0; j < M; j++)
+				A[i][j] = A[i][j] + B[i][j] - C[i][j];
+		}
+
+		return A;
+
+	};
+
+	void System::LengthOfGrad() {
+
+		double sum = 0;
+		for (int i = 0; i < M; ++i) {
+			sum += grad[i] * grad[i];
+		}
+		length_of_grad = sqrt(sum);
+
+	};
+
+
+	void System::Print(){
+			for (int i = 1; i < M + 1; ++i) {
+				cout << grad[i] << " ";
+			}
+
+		};
+
+
+	vector < double >  product_matrix_on_vector(vector < vector < double > >A, vector <double> q, int M) {
+		vector <double> a(M, 0);
+
+		for (int i = 0; i < M; i++) {
+			a[i] = 0;
+			for (int j = 0; j < M; j++) {
+				a[i] += A[i][j] * q[j];
+			}
+		}
+
+		return a;
+	}
 
 	vector < vector < double > > product(vector < vector < double > > A, vector < vector < double > > U, int N) {
 		vector < vector < double > > c(N, vector<double>(N, 0));
@@ -337,42 +485,3 @@ void Geometry::Print(int Mx, int My) {
 		}
 		return matrix1;
 	}
-
-	vector < vector < double > > System::Formula() {
-		double number1 = 0, number2 = 0;
-		vector < vector < double > > matrix1(M, vector<double>(M, 0));
-		vector < vector < double > > matrix2(M, vector<double>(M, 0));
-		vector < vector < double > > B(M, vector<double>(M, 0));
-		vector < vector < double > > C(M, vector<double>(M, 0));
-		vector <double> a(M, 0);
-		vector <double> b(M, 0);
-		matrix1 = make_matrix(alpha, alpha, M);
-		number1 = make_number(alpha, beta, M);
-		B = division_matrix_by_number(matrix1, number1, M);
-		a = product_matrix_on_vector(A, beta, M);
-		matrix2 = make_matrix(a, beta, M);
-		matrix2 = product(matrix2, A, M);
-		b = product_matrix_on_vector(A, beta, M);
-		number2 = make_number(b, beta, M);
-		C = division_matrix_by_number(matrix2, number2, M);
-
-		for (int i = 0; i < M; i++) {
-			for (int j = 0; j < M; j++)
-				A[i][j] = A[i][j] + B[i][j] - C[i][j];
-		}
-
-		return A;
-	
-	};
-
-	void System::LengthOfGrad() {
-	
-		double sum = 0;
-		for (int i = 0; i < M; ++i) {
-			sum += grad[i] * grad[i];
-		}
-		length_of_grad = sqrt(sum);
-
-	};
-
-
