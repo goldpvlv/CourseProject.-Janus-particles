@@ -11,9 +11,10 @@
 
 using namespace std;
 
-void BaseOptimTools::SetParameters(double t, int ns, double eta) {
-
-	M = 3 * (Mx + 2)*(My + 2);
+void BaseOptimTools::SetParameters(int Mx, int My, vector <double> grad, vector <double> u) {
+	u.resize(3 * (Mx + 2)*(My + 2));
+	grad.resize(3 * (Mx + 2)*(My + 2));
+	M = grad.size();
 };
 
 Gradient::Gradient(int _num_iter, double _tolerance, double _nu) {
@@ -23,27 +24,28 @@ Gradient::Gradient(int _num_iter, double _tolerance, double _nu) {
 	nu = _nu;
 }
 
-double Gradient::SetGradFirst(vector <double> grad) {
+double Gradient::SetGradFirst(vector <double> grad)  {
 
+	
 	double lenght=0.0;
 
 	for (int i = 0; i < M; i++)
 		lenght += grad[i]*grad[i];
-	return lenght;
+	return sqrt(lenght);
 };
 
-double Gradient::SetGradRegular(vector <double> grad) {
+double Gradient::SetGradRegular(vector <double> grad)  {
 
 	double lenght = 0.0;
 
 	for (int i = 0; i < M; i++)
 		lenght += grad[i] * grad[i];
-	return lenght;
+	return sqrt(lenght);
 };
 
-void Gradient::UpdateX(vector <double> u, vector <double> grad) {
-	for (int i = 0; i < grad.size(); i++)
-		u[i] = u[i] - 0.001 * grad[i];
+void Gradient::UpdateX(vector <double> u, vector <double> grad)  {
+	for (int i = 0; i < M; i++)
+		u[i] = u[i] - nu * grad[i];
 };
 
 
@@ -56,16 +58,23 @@ DFP::DFP(int _num_iter, double _tolerance, double _nu) {
 
 double DFP::SetGradFirst(vector <double> grad) {
 
+	void SingularMatrix();
+	M = grad.size();
+	alpha.resize(M);
+	beta.resize(M);
+	A.resize(M);
+	for (int i = 0; i < M; i++) A[i].resize(M);
+
 	double lenght = 0.0;
 
 	for (int i = 0; i < M; i++)
 		lenght += grad[i] * grad[i];
-	return lenght;
+	return sqrt(lenght);
 
 };
 
 
-double DFP::SetGradRegular(vector <double> grad) {
+double DFP::SetGradRegular(vector <double> grad)  {
 
 	for (int i = 0; i < grad.size(); i++)
 		beta[i] = grad[i] - beta[i];
@@ -75,13 +84,13 @@ double DFP::SetGradRegular(vector <double> grad) {
 
 	for (int i = 0; i < M; i++)
 		lenght += grad[i] * grad[i];
-	return lenght;
+	return sqrt(lenght);
 
 };
 
 
 
-void DFP::UpdateX(vector <double> u, vector <double> grad) {
+void DFP::UpdateX(vector <double> u, vector <double> grad)  {
 
 	direction = FindDirection(grad);
 	for (int i = 0; i < grad.size(); i++)

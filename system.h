@@ -47,6 +47,26 @@ public:
 	void Function();
 	void Cycling();
 
+private:
+
+	void AllocateMemory();
+	void FindG(int t);
+	void FindGforw(int t);
+	void FindGback(int t);
+	void FindFiW(int t);
+	void FindFiP(int t);
+
+	void FindQ(int t);
+	void FindFiSide(int t);
+	void FindLagrangeMultipliers(int t);
+	void FindFiSolv();
+	void FindFiTotal();
+	void FindLagrangeMultipliers();
+
+	vector < vector < double > > fi_solv;
+	vector < vector < double > > fi_total;
+	vector <double> u_solv;
+	vector <vector<double>> multipliers;
 
 
 };

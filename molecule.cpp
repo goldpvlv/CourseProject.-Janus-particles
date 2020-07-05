@@ -17,3 +17,5 @@ void Molecule::MyNewMethod() {
 	double amount_of_substance = sigma * num_atoms;
 
 };
+
+
