@@ -33,7 +33,8 @@ void System::ReadParameters() {
 
 		if (word.find("layers_x") != string::npos) ifs >> layers_x;
 		if (word.find("layers_y") != string::npos) ifs >> layers_y;
-		if (word.find("curvature") != string::npos) ifs >> Rcurv;
+		if (word.find("curvature") != string::npos) ifs >> Rcurv; 
+		if (word.find("chi_seg") != string::npos) ifs >> chi_seg;
 	}
 	ifs.close();
 }
@@ -169,26 +170,115 @@ void System::Function() {
 
 		for (int i = 1; i < layers_x + 1; ++i) {
 			for (int k = 1; k < layers_y + 1; ++k) {
-				mol[t].Gback[i][k][mol[t].ns - 1] = mol[t].G[i][k];
+				mol[t].Gback[i][k][mol[t].num_atoms - 1] = mol[t].G[i][k];
 			}
 		}
 
 		mol[t].FindGback(geo);
-		mol[t].FindQ(geo);
 
+		mol[t].FindQ(geo);
 
 		FindFiP(t);
 		FindFiSide(t);
-
-		FindLagrangeMultipliers(t);
 	}
 
-	FindFiSolv();
-	FindFiTotal();
-	FindLagrangeMultipliers();
-	FindGrad();
+	cout << "G -"<<endl;
+	for (int i = 0; i < layers_x + 1; ++i) {
+		for (int k = 0; k < layers_y + 1; ++k) {
+			
+			cout << mol[0].G[i][k] << " ";
+		}
+		cout << endl;
+	}
 
+	cout << "Gforw -"<<endl;
+	for (int j = 0; j < mol[0].num_atoms; ++j) {
+		for (int k = 0; k < layers_x + 1; ++k) {
+			for (int i = 0; i < layers_y + 1; ++i) {
+				cout << mol[0].Gforw[i][k][j] << " ";
+			}cout << endl;
+		}cout << endl;
+	}
+	cout << "Gback -"<<endl;
+	for (int j = 0; j < mol[0].num_atoms; ++j) {
+		for (int k = 0; k < layers_x + 1; ++k) {
+			for (int i = 0; i < layers_y + 1; ++i) {
+				cout << mol[0].Gforw[i][k][j] << " ";
+			}cout << endl;
+		}cout << endl;
+	}
+
+	cout <<"q-"<< mol[0].q<<endl;
+
+	cout << "fi_p mol1"<<endl;
+	for (int i = 0; i < layers_x + 1; ++i) {
+		for (int k = 0; k < layers_y + 1; ++k) {
+
+			cout << mol[0].fi_p[i][k] << " ";
+		}
+		cout << endl;
+	}
+
+	cout << "fi_side mol1" << endl;
+		for (int k = 0; k < M + 1; ++k) {
+
+			cout << mol[0].fi_side[k] << " ";
+		}
+		cout << endl;
 	
+
+	FindFiSolv();
+
+	cout << "fi+w" << endl;
+	for (int i = 0; i < layers_x + 1; ++i) {
+		for (int k = 0; k < layers_y + 1; ++k) {
+
+			cout << fi_solv[i][k] << " ";
+		}
+		cout << endl;
+	}
+
+	FindFiTotal();
+
+	cout << "fi+total" << endl;
+	for (int i = 0; i < layers_x + 1; ++i) {
+		for (int k = 0; k < layers_y + 1; ++k) {
+
+			cout << fi_total[i][k] << " ";
+		}
+		cout << endl;
+	}
+	
+	for (int t = 0; t < mol.size(); ++t) {
+		FindLagrangeMultipliers(t);
+	}
+	cout << "lagrange mult mol1" << endl;
+	for (int i = 0; i < layers_x + 1; ++i) {
+		for (int k = 0; k < layers_y + 1; ++k) {
+
+			cout << mol[0].multipliers[i][k] << " ";
+		}
+		cout << endl;
+	}
+
+	FindLagrangeMultipliers();
+	cout << "lagrange mult" << endl;
+	for (int i = 0; i < layers_x + 1; ++i) {
+		for (int k = 0; k < layers_y + 1; ++k) {
+
+			cout << multipliers[i][k] << " ";
+		}
+		cout << endl;
+	}
+
+	FindGrad();
+	cout << "grad" << endl;
+	for (int k = 0; k < M + 1; ++k) {
+
+		cout << grad[k] << " ";
+	}
+	cout << endl;
+		
 };
 
 
@@ -291,29 +381,10 @@ void System::FindFiTotal() {
 
 void System::FindLagrangeMultipliers(int t) {
 
-	vector <vector <double>> c(layers_x + 2, vector<double>(layers_y + 2,0));
-	vector <vector <double>> b(layers_x + 2, vector<double>(layers_y + 2, 0));
-
 
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int j = 1; j < layers_y + 1; ++j)
-			c[i][j] = mol[t].fi_p[i][j] * chi_seg;
-	}
-
-	for (int i = 1; i < layers_x + 1; ++i) {
-		for (int j = 1; j < layers_y + 1; ++j)
-			b[i][j] = (fi_solv[i][j] - 1)*mol[t].chi;
-	}
-
-	for (int i = 1; i < layers_x + 1; ++i) {
-		for (int j = 1; j < layers_y + 1; ++j)
-			c[i][j]=c[i][j] + b[i][j];
-	}
-
-
-	for (int i = 1; i < layers_x + 1; ++i) {
-		for (int j = 1; j < layers_y + 1; ++j)
-			mol[t].multipliers[i][j] = mol[t].u[i*(layers_y + 2) + j] - c[i][j]/fi_total[i][j]; ///?????
+			mol[t].multipliers[i][j] = mol[t].u[i*(layers_y + 2) + j] - (mol[t].fi_p[i][j] * chi_seg + (fi_solv[i][j] - 1)*mol[t].chi) /fi_total[i][j]; 
 	}
 
 };
@@ -322,20 +393,10 @@ void System::FindLagrangeMultipliers(int t) {
 void System::FindLagrangeMultipliers() {
 
 
-	vector <vector <double>> c(layers_x + 2, vector<double>(layers_y + 2, 0));
-
-
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int j = 1; j < layers_y + 1; ++j)
-			c[i][j] = mol[0].fi_p[i][j] * mol[0].chi + mol[1].fi_p[i][j] * mol[1].chi;
+			multipliers[i][j] = u[i*(layers_y + 2) + j] - (mol[0].fi_p[i][j] * mol[0].chi + mol[1].fi_p[i][j] * mol[1].chi) / fi_total[i][j];
 	}
-
-
-	for (int i = 1; i < layers_x + 1; ++i) {
-		for (int j = 1; j < layers_y + 1; ++j)
-			multipliers[i][j] = u[i*(layers_y + 2) + j] - c[i][j] / fi_total[i][j]; ///?????
-	}
-
 
 };
 
@@ -346,7 +407,7 @@ void System::FindGrad() {
 
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int j = 1; j < layers_y + 1; ++j)
-			middle_multipliers[i][j] = 1/3*(mol[0].multipliers[i][j] + mol[1].multipliers[i][j] + multipliers[i][j]);
+			middle_multipliers[i][j] = 0.33333*(mol[0].multipliers[i][j] + mol[1].multipliers[i][j] + multipliers[i][j]);
 	}
 
 	for (int i = 1; i < layers_x + 1; ++i) {
@@ -378,7 +439,7 @@ void System::AllocateMemory() {
 
 void System::Cycling() {
 
-	int M = 3 * (layers_x + 2)*(layers_y + 2);
+	M = 3 * (layers_x + 2)*(layers_y + 2);
 	
 	for (int i = 0; i < mol.size(); ++i) {
 			mol[i].AllocateMemory(layers_x, layers_y, M);
@@ -388,44 +449,83 @@ void System::Cycling() {
 
 
 	for (BaseOptimTools &scheme : methods) {
-		cout << scheme.name << endl;
 		
-		scheme.SetParameters(layers_x, layers_y, grad, u);
+			cout << scheme.name << endl;
 
-		double length_of_grad = 0.0;
-		int step = 0.0;
+			scheme.SetParameters(layers_x, layers_y, grad, u);
 
-		Function();
-		length_of_grad = scheme.SetGradFirst(grad);
 
-		do {
-			scheme.UpdateX(u, grad);
+			double length_of_grad = 0.0;
+			int step = 0.0;
+
 			Function();
-			length_of_grad = scheme.SetGradRegular(grad);
+			
 
-			step++;
-			cout << step << "     " << length_of_grad << endl;
-		} while ((length_of_grad > scheme.tolerance) && (step < scheme.num_iter));
-	}
+			length_of_grad = scheme.SetGradFirst(grad);
+			cout << length_of_grad;
+
+			do {
+				scheme.UpdateX(u, grad);
+				Function();
+				
+				length_of_grad = scheme.SetGradRegular(grad);
+
+				step++;
+				cout << step << "     " << length_of_grad << endl;
+			} while ((length_of_grad > scheme.tolerance) && (step < scheme.num_iter));
+		}
+	
 };
 
 
 
 void System::Output() {
 
-	FILE * txt = fopen("fi_p_out.txt", "w");
-	fprintf(txt, "%5d ", (int)layers_y);
+	FILE * txt1 = fopen("fi_p_1.txt", "w");
+	fprintf(txt1, "%5d ", (int)layers_y);
 	for (int j = 1; j < layers_y + 1; j++) {
-		fprintf(txt, " %11d", j);
+		fprintf(txt1, " %11d", j);
 	}
-	fprintf(txt, "\n");
+	fprintf(txt1, "\n");
 	for (int i = 1; i < layers_x + 1; i++) {
-		fprintf(txt, "%5d ", i);
+		fprintf(txt1, "%5d ", i);
 		for (int j = 1; j < layers_y + 1; j++) {
-			fprintf(txt, " %8.5e", fi_total[i][j]);
+			fprintf(txt1, " %8.5e", mol[0].fi_p[i][j]);
 		}
-		fprintf(txt, "\n");
+		fprintf(txt1, "\n");
 	}
-	fclose(txt);
+	fclose(txt1);
+
+
+	FILE * txt2 = fopen("fi_p_2.txt", "w");
+	fprintf(txt2, "%5d ", (int)layers_y);
+	for (int j = 1; j < layers_y + 1; j++) {
+		fprintf(txt2, " %11d", j);
+	}
+	fprintf(txt2, "\n");
+	for (int i = 1; i < layers_x + 1; i++) {
+		fprintf(txt2, "%5d ", i);
+		for (int j = 1; j < layers_y + 1; j++) {
+			fprintf(txt2, " %8.5e", mol[1].fi_p[i][j]);
+		}
+		fprintf(txt2, "\n");
+	}
+	fclose(txt2);
+
+	FILE * txt3 = fopen("fi_p_1+2.txt", "w");
+	fprintf(txt3, "%5d ", (int)layers_y);
+	for (int j = 1; j < layers_y + 1; j++) {
+		fprintf(txt3, " %11d", j);
+	}
+	fprintf(txt3, "\n");
+	for (int i = 1; i < layers_x + 1; i++) {
+		fprintf(txt3, "%5d ", i);
+		for (int j = 1; j < layers_y + 1; j++) {
+			fprintf(txt3, " %8.5e", mol[1].fi_p[i][j]+ mol[0].fi_p[i][j] );
+		}
+		fprintf(txt3, "\n");
+	}
+	fclose(txt3);
+
 
 };

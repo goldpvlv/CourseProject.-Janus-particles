@@ -101,7 +101,7 @@ void Polar::UpdateSquareFront() {
 }
 
 void Polar::UpdateSquareSide() {
-	int delta_h = 1;
+
 	for (int i = 1; i < Mx + 1; ++i) {
 		for (int j = 1; j < My + 1; ++j) {
 			square_side[i][j] = delta_h * (i *i - (i - 1) * (i - 1));
@@ -110,7 +110,7 @@ void Polar::UpdateSquareSide() {
 }
 
 void Polar::UpdateSquareUp() {
-	int delta_h = 1;
+
 	for (int i = 1; i < Mx + 1; ++i) {
 		for (int j = 1; j < My + 1; ++j) {
 			square_up[i][j] = delta_h * i * My;
@@ -119,7 +119,7 @@ void Polar::UpdateSquareUp() {
 }
 
 void Polar::UpdateVolume() {
-	int delta_h = 1;
+
 	for (int i = 1; i < Mx + 1; ++i) {
 		for (int j = 1; j < My + 1; ++j) {
 			volume[i][j] = 0.5*My*(i *i - (i - 1) * (i - 1))*delta_h;

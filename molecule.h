@@ -27,7 +27,7 @@ class Molecule {
 public:
 
 	double theta, sigma, chi;
-	int xmin, xmax, ymin, ymax, num_generation, num_atoms, ns;
+	int layers_x, layers_y, xmin, xmax, ymin, ymax, num_generation, num_atoms, ns;
 	
 	void SetParameters();
 	void AllocateMemory(int layers_x_, int layers_y_, int M);

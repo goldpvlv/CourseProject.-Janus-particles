@@ -15,9 +15,10 @@ using namespace std;
 
 void BaseOptimTools::SetParameters(int Mx, int My, vector <double> grad, vector <double> u) {
 
-	u.resize(3 * (Mx + 2)*(My + 2));
-	grad.resize(3 * (Mx + 2)*(My + 2));
+	u.resize(3 * (Mx + 2)*(My + 2),0);
+	grad.resize(3 * (Mx + 2)*(My + 2),0);
 	M = grad.size();
+	direction.resize(M + 2, 0);
 };
 
 Gradient::Gradient(int _num_iter, double _tolerance, double _nu) {
@@ -61,11 +62,13 @@ DFP::DFP(int _num_iter, double _tolerance, double _nu) {
 double DFP::SetGradFirst(vector <double> grad)  {
 
 	
-	alpha.resize(M);
-	beta.resize(M);
+	alpha.resize(M+2,0);
+	beta.resize(M+2,0);
 	A.assign(M, vector<double>(M));
 
-	void SingularMatrix();
+	SingularMatrix();
+	
+
 	double lenght = 0.0;
 
 	for (int i = 0; i < M; i++)
@@ -77,7 +80,7 @@ double DFP::SetGradFirst(vector <double> grad)  {
 
 double DFP::SetGradRegular(vector <double> grad)  {
 
-	for (int i = 0; i < grad.size(); i++)
+	for (int i = 0; i < M; i++)
 		beta[i] = grad[i] - beta[i];
 	A = Formula();
 
@@ -94,14 +97,24 @@ double DFP::SetGradRegular(vector <double> grad)  {
 void DFP::UpdateX(vector <double> &u, vector <double> grad)  {
 
 	direction = FindDirection(grad);
-	for (int i = 0; i < grad.size(); i++)
+
+	for (int i = 0; i < M; i++) {
 		alpha[i] = u[i];
-	for (int i = 0; i < grad.size(); i++)
+	}
+
+
+	for (int i = 0; i < M; i++) {
+
 		u[i] = u[i] + nu * direction[i];
-	for (int i = 0; i < grad.size(); i++)
+	}
+	cout << endl;
+
+
+	
+	for (int i = 0; i < M; i++)
 		alpha[i] = u[i] - alpha[i];
 
-	for (int i = 0; i < grad.size(); i++)
+	for (int i = 0; i < M; i++)
 		beta[i] = grad[i];
 
 
@@ -119,12 +132,13 @@ void DFP::SingularMatrix() {
 
 vector<double> DFP::FindDirection(vector<double>grad) {
 
-	vector <double> direction(M, 0);
 
 	direction = Multiply_matrix_by_vector(A, grad);
 
-	for (int i = 0; i < M; i++)
+	for (int i = 0; i < M; i++) {
+
 		direction[i] = -1 * direction[i];
+	}
 	return direction;
 
 };
@@ -194,6 +208,19 @@ double DFP::Find_number(vector<double> a, vector<double> b) {
 
 vector < double > DFP::Multiply_matrix_by_vector(vector<vector<double>>A, vector<double>grad) {
 	vector <double> a(M, 0);
+
+	/*for (int i = 0; i < M; i++) {
+		for (int j = 0; j < M; j++) {
+			cout << A[i][j] << "  "; 
+		}
+	}*/
+
+
+		/*for (int j = 0; j < M; j++) {
+			cout << grad[j]<<"//";
+		}*/
+	
+
 	for (int i = 0; i < M; i++) {
 		a[i] = 0;
 		for (int j = 0; j < M; j++) {

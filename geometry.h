@@ -54,6 +54,7 @@ public:
 
 class Polar : public Geometry {
 public:
+	int delta_h = 1;
 	void UpdateVolume();
 	void UpdateSquareFront();
 	void UpdateSquareUp();

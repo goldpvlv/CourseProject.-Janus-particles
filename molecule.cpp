@@ -14,9 +14,8 @@ using namespace std;
 
 void Molecule::SetParameters() {
 
-	int num_atoms = 1 + ns * (pow(2, num_generation + 1) - 1);
-	double amount_of_substance = sigma * num_atoms;
-	theta = sigma * ns;
+	num_atoms = 1 + ns * (pow(2, num_generation + 1) - 1);
+	theta = sigma * num_atoms;
 
 };
 
@@ -49,18 +48,11 @@ void Molecule::FindG() {
 
 void Molecule::FindGforw(Geometry geo) {
 
-	vector3d Gforw(layers_x + 2, vector <vector<double>>(layers_y + 2, vector<double>(ns, 0)));
-
-	for (int i = xmin; i < xmax + 1; ++i) {
-		for (int k = ymin; k < ymax + 1; ++k) {
-			Gforw[i][k][0] = G[i][k];
-		}
-	}
-
 	for (int j = 1; j < num_atoms; ++j) {
 		for (int k = 1; k < layers_x + 1; ++k) {
 			for (int i = 1; i < layers_y + 1; ++i) {
-				Gforw[i][k][j] =G[i][k] * (geo.lambda_bb[i][k] * Gforw[i - 1][k - 1][j - 1] + geo.lambda_bn[i][k] * Gforw[i - 1][k][j - 1] + geo.lambda_bf[i][k] * Gforw[i - 1][k + 1][j - 1] +
+				
+				Gforw[i][k][j] = G[i][k] * (geo.lambda_bb[i][k] * Gforw[i - 1][k - 1][j - 1] + geo.lambda_bn[i][k] * Gforw[i - 1][k][j - 1] + geo.lambda_bf[i][k] * Gforw[i - 1][k + 1][j - 1] +
 					geo.lambda_nb[i][k] * Gforw[i][k - 1][j - 1] + geo.lambda_nn[i][k] * Gforw[i][k][j - 1] + geo.lambda_nf[i][k] * Gforw[i][k + 1][j - 1] +
 					geo.lambda_fb[i][k] * Gforw[i + 1][k - 1][j - 1] + geo.lambda_fn[i][k] * Gforw[i + 1][k + 1][j - 1] + geo.lambda_ff[i][k] * Gforw[i + 1][k + 1][j - 1]);
 
@@ -78,11 +70,7 @@ void Molecule::FindGforw(Geometry geo) {
 
 void Molecule::FindGback(Geometry geo) {
 
-	for (int i = 1; i < layers_x + 1; ++i) {
-		for (int k = 1; k < layers_y + 1; ++k) {
-			Gback[i][k][num_atoms - 1] = G[i][k];
-		}
-	}
+
 	for (int j = num_atoms - 1; j > 0; --j) {
 		for (int k = 1; k < layers_x + 1; ++k) {
 			for (int i = 1; i < layers_y + 1; ++i) {
