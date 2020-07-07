@@ -9,21 +9,28 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+#include "geometry.h"
+
+
 using namespace std;
 using vector3d = vector<vector<vector<double>>>;
 
 
 
 class Molecule {
+
+
+	friend class System;
+
+
 public:
 
-	friend System;
-
 	double theta, sigma, chi;
-	int xmin, xmax, ymin, ymax, num_generation, ns;
+	int xmin, xmax, ymin, ymax, num_generation, num_atoms, ns;
 	
-	void MyNewMethod();
-	void AllocateMemory();
+	void SetParameters();
+	void AllocateMemory(int layers_x_, int layers_y_, int M);
 
 	double q;
 	vector3d Gback;
@@ -36,8 +43,8 @@ public:
 
 	
 	void FindG();
-	void FindGforw();
-	void FindGback();
-	void FindQ();
+	void FindGforw(Geometry geo);
+	void FindGback(Geometry geo);
+	void FindQ(Geometry geo);
 
 };

@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -43,7 +45,7 @@ double Gradient::SetGradRegular(vector <double> grad)  {
 	return sqrt(lenght);
 };
 
-void Gradient::UpdateX(vector <double> u, vector <double> grad)  {
+void Gradient::UpdateX(vector <double> &u, vector <double> grad)  {
 	for (int i = 0; i < M; i++)
 		u[i] = u[i] - nu * grad[i];
 };
@@ -89,7 +91,7 @@ double DFP::SetGradRegular(vector <double> grad)  {
 
 
 
-void DFP::UpdateX(vector <double> u, vector <double> grad)  {
+void DFP::UpdateX(vector <double> &u, vector <double> grad)  {
 
 	direction = FindDirection(grad);
 	for (int i = 0; i < grad.size(); i++)

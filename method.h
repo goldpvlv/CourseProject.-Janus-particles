@@ -24,7 +24,7 @@ public:
 
 	virtual double SetGradFirst(vector <double> grad)  { double q = 0.0; return q; };
 	virtual double SetGradRegular(vector <double> grad) { double q = 0.0; return q; };
-	virtual void UpdateX(vector <double> x, vector <double> grad) {};
+	virtual void UpdateX(vector <double> &x, vector <double> grad) {};
 
 	void SetParameters(int Mx, int My, vector <double> grad, vector <double> u);
 
@@ -37,7 +37,7 @@ class Gradient : public BaseOptimTools
 public:
 	double SetGradFirst(vector <double> grad) override;
 	double SetGradRegular(vector <double> grad) override;
-	void UpdateX(vector <double> x, vector <double> grad) override;
+	void UpdateX(vector <double> &x, vector <double> grad) override;
 
 	Gradient(int _num_iter, double _tolerance, double _nu);
 
@@ -50,7 +50,7 @@ public:
 
 	double SetGradFirst(vector <double> grad) override;
 	double SetGradRegular(vector <double> grad) override;
-	void UpdateX(vector <double> x, vector <double> grad) override;
+	void UpdateX(vector <double> &x, vector <double> grad) override;
 
 	DFP(int _num_iter, double _tolerance, double _nu);
 

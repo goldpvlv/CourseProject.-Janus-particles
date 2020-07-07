@@ -8,7 +8,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
+#include "geometry.h"
+#include "molecule.h"
+#include "method.h"   
 
 
 using namespace std;
@@ -55,9 +57,10 @@ private:
 	void AllocateMemory();
 	//void FindG(int t);
 	/*void FindGforw(int t);
-	void FindGback(int t);*/
+	void FindGback(int t);
+	void FindQ(int t);*/
+
 	void FindFiP(int t);
-	void FindQ(int t);
 	void FindFiSide(int t);
 	void FindLagrangeMultipliers(int t);
 	void FindFiSolv();

@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -93,7 +95,7 @@ void System::ReadMolecules() {
 
 			}
 
-			new_mol.MyNewMethod();
+			new_mol.SetParameters();
 			mol.push_back(new_mol);
 		}
 	}
@@ -163,7 +165,7 @@ void System::Function() {
 			}
 		}
 
-		mol[t].FindGforw();
+		mol[t].FindGforw(geo);
 
 		for (int i = 1; i < layers_x + 1; ++i) {
 			for (int k = 1; k < layers_y + 1; ++k) {
@@ -171,8 +173,8 @@ void System::Function() {
 			}
 		}
 
-		mol[t].FindGback();
-		mol[t].FindQ();
+		mol[t].FindGback(geo);
+		mol[t].FindQ(geo);
 
 
 		FindFiP(t);
@@ -197,56 +199,56 @@ void System::FindFiSide(int t) {
 		for (int i = -1; i <= 1; ++i) {
 			for (int j = -1; j <= 1; ++j) {
 				if (i == j == -1) {
-					for (int l = 0; l < layers_x + 1; ++l) {
-						for (int k = 0; k < layers_y + 1; ++k)
+					for (int l = 1; l < layers_x + 1; ++l) {
+						for (int k = 1; k < layers_y + 1; ++k)
 							mol[t].fi_side[l * (layers_y + 2) + k] += geo.lambda_bb[l][k] * mol[t].fi_p[l+i][k+j];
 					}
 				}
 				else if (i == -1 && j == 0) {
-					for (int l = 0; l < layers_x + 1; ++l) {
-						for (int k = 0; k < layers_y + 1; ++k)
+					for (int l = 1; l < layers_x + 1; ++l) {
+						for (int k = 1; k < layers_y + 1; ++k)
 							mol[t].fi_side[l * (layers_y + 2) + k] += geo.lambda_bn[l][k] * mol[t].fi_p[l+i][k+j];
 					}
 				}
 				else if (i == -1 && j == 1) {
-					for (int l = 0; l < layers_x + 1; ++l) {
-						for (int k = 0; k < layers_y + 1; ++k)
+					for (int l = 1; l < layers_x + 1; ++l) {
+						for (int k = 1; k < layers_y + 1; ++k)
 							mol[t].fi_side[l * (layers_y + 2) + k] += geo.lambda_bf[l][k] * mol[t].fi_p[l+i][k+j];
 					}
 				}
 				else if (i == 0 && j == -1) {
-					for (int l = 0; l < layers_x + 1; ++l) {
-						for (int k = 0; k < layers_y + 1; ++k)
+					for (int l = 1; l < layers_x + 1; ++l) {
+						for (int k = 1; k < layers_y + 1; ++k)
 							mol[t].fi_side[l * (layers_y + 2) + k] += geo.lambda_nb[l][k] * mol[t].fi_p[l+i][k+j];
 					}
 				}
 				else if (i == 0 && j == 0) {
-					for (int l = 0; l < layers_x + 1; ++l) {
-						for (int k = 0; k < layers_y + 1; ++k)
+					for (int l = 1; l < layers_x + 1; ++l) {
+						for (int k = 1; k < layers_y + 1; ++k)
 							mol[t].fi_side[l * (layers_y + 2) + k] += geo.lambda_nn[l][k] * mol[t].fi_p[l+i][k+j];
 					}
 				}
 				else if (i == 0 && j == 1) {
-					for (int l = 0; l < layers_x + 1; ++l) {
-						for (int k = 0; k < layers_y + 1; ++k)
+					for (int l = 1; l < layers_x + 1; ++l) {
+						for (int k = 1; k < layers_y + 1; ++k)
 							mol[t].fi_side[l * (layers_y + 2) + k] += geo.lambda_nf[l][k] * mol[t].fi_p[l+i][k+j];
 					}
 				}
 				else if (i == 1 && j == -1) {
-					for (int l = 0; l < layers_x + 1; ++l) {
-						for (int k = 0; k < layers_y + 1; ++k)
+					for (int l = 1; l < layers_x + 1; ++l) {
+						for (int k = 1; k < layers_y + 1; ++k)
 							mol[t].fi_side[l * (layers_y + 2) + k] += geo.lambda_fb[l][k] * mol[t].fi_p[l+i][k+j];
 					}
 				}
 				else if (i == 1 && j == 0) {
-					for (int l = 0; l < layers_x + 1; ++l) {
-						for (int k = 0; k < layers_y + 1; ++k)
+					for (int l = 1; l < layers_x + 1; ++l) {
+						for (int k = 1; k < layers_y + 1; ++k)
 							mol[t].fi_side[l * (layers_y + 2) + k] += geo.lambda_fn[l][k] * mol[t].fi_p[l+i][k+j];
 					}
 				}
 				else if (i == 1 && j == 1) {
-					for (int l = 0; l < layers_x + 1; ++l) {
-						for (int k = 0; k < layers_y + 1; ++k)
+					for (int l = 1; l < layers_x + 1; ++l) {
+						for (int k = 1; k < layers_y + 1; ++k)
 							mol[t].fi_side[l * (layers_y + 2) + k] += geo.lambda_ff[l][k] * mol[t].fi_p[l+i][k+j];
 					}
 				}
@@ -260,7 +262,7 @@ void System::FindFiP(int t) {
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int k = 1; k < layers_y + 1; ++k) {
 			sum = 0;
-			for (int j = 0; j < mol[t].ns; ++j)
+			for (int j = 0; j < mol[t].num_atoms; ++j)
 				sum += (mol[t].Gforw[i][k][j] * mol[t].Gback[i][k][j]) / mol[t].G[i][k];
 
 			mol[t].fi_p[i][k] = (mol[t].theta / mol[t].q)*sum;
@@ -290,21 +292,22 @@ void System::FindFiTotal() {
 void System::FindLagrangeMultipliers(int t) {
 
 	vector <vector <double>> c(layers_x + 2, vector<double>(layers_y + 2,0));
+	vector <vector <double>> b(layers_x + 2, vector<double>(layers_y + 2, 0));
 
 
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int j = 1; j < layers_y + 1; ++j)
-			mol[t].fi_p[i][j] = mol[t].fi_p[i][j] * chi_seg;
+			c[i][j] = mol[t].fi_p[i][j] * chi_seg;
 	}
 
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int j = 1; j < layers_y + 1; ++j)
-			fi_solv[i][j] = (fi_solv[i][j] - 1)*mol[t].chi;
+			b[i][j] = (fi_solv[i][j] - 1)*mol[t].chi;
 	}
 
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int j = 1; j < layers_y + 1; ++j)
-			c[i][j]= fi_solv[i][j] +  mol[t].fi_p[i][j];
+			c[i][j]=c[i][j] + b[i][j];
 	}
 
 
@@ -339,31 +342,24 @@ void System::FindLagrangeMultipliers() {
 
 void System::FindGrad() {
 
+	int MM = (layers_x + 2)*(layers_y + 2);
+
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int j = 1; j < layers_y + 1; ++j)
 			middle_multipliers[i][j] = 1/3*(mol[0].multipliers[i][j] + mol[1].multipliers[i][j] + multipliers[i][j]);
 	}
 
-	for (int z = 0; z < M; ++z) {
-		for (int i = 1; i < layers_x + 1; ++i) {
-			for (int j = 1; j < layers_y + 1; ++j)
-				grad[i*(layers_y + 2) + j] = 1 - 1 / fi_total[i][j] + middle_multipliers[i][j] + mol[0].multipliers[i][j];
-		}
+	for (int i = 1; i < layers_x + 1; ++i) {
+		for (int j = 1; j < layers_y + 1; ++j)
+			grad[i*(layers_y + 2) + j] = 1 - 1 / fi_total[i][j] + middle_multipliers[i][j] - mol[0].multipliers[i][j];
 	}
-
-	for (int z = M; z < 2*M; ++z) {
-		for (int i = 1; i < layers_x + 1; ++i) {
-			for (int j = 1; j < layers_y + 1; ++j)
-				grad[i*(layers_y + 2) + j] = 1 - 1 / fi_total[i][j] + middle_multipliers[i][j] + mol[1].multipliers[i][j];
-		}
+	for (int i = 1; i < layers_x + 1; ++i) {
+		for (int j = 1; j < layers_y + 1; ++j)
+			grad[i*(layers_y + 2) + j + MM] = 1 - 1 / fi_total[i][j] + middle_multipliers[i][j] - mol[1].multipliers[i][j];
 	}
-
-
-	for (int z = 2*M; z < 3*M ; ++z) {
-		for (int i = 1; i < layers_x + 1; ++i) {
-			for (int j = 1; j < layers_y + 1; ++j)
-				grad[i*(layers_y + 2) + j] = 1 - 1 / fi_total[i][j] + middle_multipliers[i][j] + multipliers[i][j];
-		}
+	for (int i = 1; i < layers_x + 1; ++i) {
+		for (int j = 1; j < layers_y + 1; ++j)
+			grad[i*(layers_y + 2) + j + 2 * MM] = 1 - 1 / fi_total[i][j] + middle_multipliers[i][j] - multipliers[i][j];
 	}
 
 };
@@ -376,24 +372,24 @@ void System::AllocateMemory() {
 	fi_solv.assign(layers_x + 1, vector<double>(layers_y + 1, 0));
 	fi_total.assign(layers_x + 1, vector<double>(layers_y + 1, 0));
 	multipliers.assign(layers_x + 1, vector<double>(layers_y + 1, 0));
-	middle_multipliers.assign;
+	middle_multipliers.assign(layers_x + 1, vector<double>(layers_y + 1, 0));
 
 };
 
 void System::Cycling() {
 
 	int M = 3 * (layers_x + 2)*(layers_y + 2);
+	
+	for (int i = 0; i < mol.size(); ++i) {
+			mol[i].AllocateMemory(layers_x, layers_y, M);
+	}
+
+	AllocateMemory();
+
 
 	for (BaseOptimTools &scheme : methods) {
 		cout << scheme.name << endl;
-
 		
-		for (int i = 0; i < mol.size(); ++i) {
-			mol[i].AllocateMemory();
-		}
-
-		AllocateMemory();
-
 		scheme.SetParameters(layers_x, layers_y, grad, u);
 
 		double length_of_grad = 0.0;
