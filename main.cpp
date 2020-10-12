@@ -31,33 +31,22 @@
 #include <fstream>
 #include <stdio.h>
 #include <string>
-#include <conio.h>
-
 
 #include "molecule.h"
 #include "method.h"
 #include "geometry.h"
 #include "system.h"
-
-
-
 using namespace std;
-
-
 int main() {
-
-
 
 	string my_source = "input.txt";
 	System system(my_source);
-
 	system.ReadParameters();
 	system.SetGeometry();
 	system.ReadMolecules();
 	system.ReadMethods();
 	system.Cycling();
 	system.Output();
-
 
 	return 0;
 }

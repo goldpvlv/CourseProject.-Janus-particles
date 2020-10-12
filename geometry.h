@@ -10,16 +10,14 @@
 #include <stdio.h>
 
 using namespace std;
-const double pi = 3.14159265359;
 
+const double pi = 3.14159265359;
 class Geometry {
 public:
-	mutable int Mx, My;
-	double R0, alpha, delta_alpha;
-	void GetValue(int Mx_, int My_, double R0_);
-
-	Geometry() {};
-
+	mutable int Mx, My;//число слоев по х, y
+	double R0, delta_alpha;//кривизна, угол
+	void GetValue(int Mx_, int My_, double R0_);//метод для считывания параметров
+	Geometry() {};//конструктор класса
 	vector < vector < double > >lambda_bb;
 	vector < vector < double > >lambda_bn;
 	vector < vector < double > >lambda_bf;
@@ -35,21 +33,21 @@ public:
 	vector < vector < double > >square_front;
 	vector < vector < double > >square_right;
 	vector < vector < double > >square_left;
-
-	virtual void UpdateVolume() const {};
-	virtual void UpdateSquareFront() const {};
-	virtual void UpdateSquareUp() const {};
-	virtual void UpdateSquareLeft() const {};
-	virtual void UpdateSquareRight() const {};
-	virtual void UpdateSquareSide() const {};
-	virtual void Transposition() const {};
-	void AllocateMemory();
-	
-	void PrintVolume();
-	void Print();
-	
-	~Geometry() {};
+	virtual void UpdateVolume() const {};      //метод нахождения объема
+	virtual void UpdateSquareFront() const {};//метод нахождения площади фронтальной стороны
+	virtual void UpdateSquareUp() const {};//метод нахождения площади верхней стороны
+	virtual void UpdateSquareLeft() const {};//метод нахождения площади левой стороны
+	virtual void UpdateSquareRight() const {};//метод нахождения площади правой стороны
+	virtual void UpdateSquareSide() const {};//метод нахождения площади боковой стороны
+	virtual void Transposition() const {};//метод нахождения вероятностей перехода
+	void AllocateMemory();//инициализация данных
+	~Geometry() {};//деконструктор класса
 };
+
+
+
+
+
 
 
 class Polar : public Geometry {
@@ -61,8 +59,6 @@ public:
 	void UpdateSquareSide();
 	void Transposition();
 };
-
-
 class Torus : public Geometry {
 public:
 	void UpdateVolume();
@@ -70,5 +66,4 @@ public:
 	void UpdateSquareUp();
 	void UpdateSquareLeft();
 	void UpdateSquareRight();
-	void Transposition();
-};
+	void Transposition();};

@@ -16,22 +16,14 @@
 using namespace std;
 using vector3d = vector<vector<vector<double>>>;
 
-
-
 class Molecule {
-
-
 	friend class System;
-
-
 public:
-
 	double theta, sigma, chi;
 	int layers_x, layers_y, xmin, xmax, ymin, ymax, num_generation, num_atoms, ns;
 	
-	void SetParameters();
-	void AllocateMemory(int layers_x_, int layers_y_, int M);
-
+	void SetParameters();//метод считывания параметров молекулы
+	void AllocateMemory(int layers_x_, int layers_y_, int M);//метод инициализации данных
 	double q;
 	vector3d Gback;
 	vector3d Gforw;
@@ -41,10 +33,11 @@ public:
 	vector<vector<double>> fi_p;
 	vector<vector<double>> multipliers;
 
-	
-	void FindG();
-	void FindGforw(Geometry geo);
-	void FindGback(Geometry geo);
-	void FindQ(Geometry geo);
+	void FindG();//метод для нахождения распределения Больцмана
+	void FindGforw(Geometry geo);//метод нахождения прямого пропагатора
+	void FindGback(Geometry geo);//метод нахождения обратного пропагатора
+	void FindQ(Geometry geo);//метод нахождения статической суммы
+	void FindFiP();//метод нахождения профилей плотности молекулы
+	void FindFiSide(Geometry geo);//метод нахождения профиля плотности окружения
 
 };

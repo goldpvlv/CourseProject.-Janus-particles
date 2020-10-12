@@ -6,15 +6,11 @@
 #include <fstream>
 #include <stdio.h>
 #include <string>
-#include <conio.h>
+
 
 #include "method.h"
-
-
 using namespace std;
-
 void BaseOptimTools::SetParameters(int Mx, int My, vector <double> grad, vector <double> u) {
-
 	u.resize(3 * (Mx + 2)*(My + 2),0);
 	grad.resize(3 * (Mx + 2)*(My + 2),0);
 	M = grad.size();
@@ -31,7 +27,6 @@ Gradient::Gradient(int _num_iter, double _tolerance, double _nu) {
 double Gradient::SetGradFirst(vector <double> grad)  {
 
 	double lenght=0.0;
-
 	for (int i = 0; i < M; i++)
 		lenght += grad[i]*grad[i];
 	return sqrt(lenght);
@@ -40,17 +35,15 @@ double Gradient::SetGradFirst(vector <double> grad)  {
 double Gradient::SetGradRegular(vector <double> grad)  {
 
 	double lenght = 0.0;
-
 	for (int i = 0; i < M; i++)
 		lenght += grad[i] * grad[i];
-	return sqrt(lenght);
-};
+	return sqrt(lenght);};
+
 
 void Gradient::UpdateX(vector <double> &u, vector <double> grad)  {
 	for (int i = 0; i < M; i++)
 		u[i] = u[i] - nu * grad[i];
 };
-
 
 DFP::DFP(int _num_iter, double _tolerance, double _nu) {
 	name = "DFP";
@@ -61,14 +54,12 @@ DFP::DFP(int _num_iter, double _tolerance, double _nu) {
 
 double DFP::SetGradFirst(vector <double> grad)  {
 
-	
 	alpha.resize(M+2,0);
 	beta.resize(M+2,0);
 	A.assign(M, vector<double>(M));
 
 	SingularMatrix();
 	
-
 	double lenght = 0.0;
 
 	for (int i = 0; i < M; i++)
@@ -77,11 +68,11 @@ double DFP::SetGradFirst(vector <double> grad)  {
 
 };
 
-
 double DFP::SetGradRegular(vector <double> grad)  {
 
 	for (int i = 0; i < M; i++)
 		beta[i] = grad[i] - beta[i];
+
 	A = Formula();
 
 	double lenght = 0.0;
@@ -92,33 +83,24 @@ double DFP::SetGradRegular(vector <double> grad)  {
 
 };
 
-
-
 void DFP::UpdateX(vector <double> &u, vector <double> grad)  {
 
 	direction = FindDirection(grad);
-
 	for (int i = 0; i < M; i++) {
 		alpha[i] = u[i];
 	}
-
-
 	for (int i = 0; i < M; i++) {
 
 		u[i] = u[i] + nu * direction[i];
 	}
 	cout << endl;
-
-
 	
 	for (int i = 0; i < M; i++)
 		alpha[i] = u[i] - alpha[i];
 
 	for (int i = 0; i < M; i++)
 		beta[i] = grad[i];
-
-
-}
+};
 
 void DFP::SingularMatrix() {
 	for (int i = 0; i < M; ++i) {
@@ -130,19 +112,21 @@ void DFP::SingularMatrix() {
 	}
 };
 
-vector<double> DFP::FindDirection(vector<double>grad) {
 
+
+
+
+vector<double> DFP::FindDirection(vector<double>grad) {
 
 	direction = Multiply_matrix_by_vector(A, grad);
 
 	for (int i = 0; i < M; i++) {
-
 		direction[i] = -1 * direction[i];
 	}
+
 	return direction;
 
 };
-
 
 vector < vector < double > > DFP::Formula() {
 	double number1 = 0, number2 = 0;
@@ -150,10 +134,8 @@ vector < vector < double > > DFP::Formula() {
 	vector < vector < double > > matrix2(M, vector<double>(M, 0));
 	vector < vector < double > > B(M, vector<double>(M, 0));
 	vector < vector < double > > C(M, vector<double>(M, 0));
-
 	vector <double> a(M, 0);
 	vector <double> b(M, 0);
-
 
 	matrix1 = Multiply_vectors(alpha, alpha);
 	number1 = Find_number(alpha, beta);
@@ -205,21 +187,9 @@ double DFP::Find_number(vector<double> a, vector<double> b) {
 	return number;
 };
 
-
-vector < double > DFP::Multiply_matrix_by_vector(vector<vector<double>>A, vector<double>grad) {
+vector < double > DFP::Multiply_matrix_by_vector(vector<vector<double>>A,
+vector<double>grad) {
 	vector <double> a(M, 0);
-
-	/*for (int i = 0; i < M; i++) {
-		for (int j = 0; j < M; j++) {
-			cout << A[i][j] << "  "; 
-		}
-	}*/
-
-
-		/*for (int j = 0; j < M; j++) {
-			cout << grad[j]<<"//";
-		}*/
-	
 
 	for (int i = 0; i < M; i++) {
 		a[i] = 0;
