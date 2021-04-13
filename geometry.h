@@ -59,6 +59,7 @@ public:
 	void UpdateSquareSide();
 	void Transposition();
 };
+
 class Torus : public Geometry {
 public:
 	void UpdateVolume();
@@ -66,4 +67,15 @@ public:
 	void UpdateSquareUp();
 	void UpdateSquareLeft();
 	void UpdateSquareRight();
-	void Transposition();};
+	void Transposition();
+};
+
+class Sphere :public Geometry {
+public:
+
+	void UpdateVolume();
+	void UpdateSquareFront();
+	void UpdateSquareUp();
+	void UpdateSquareSide();
+	void Transposition();
+};

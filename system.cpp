@@ -26,11 +26,13 @@ void System::ReadParameters() {
 	while (ifs.good()) {
 		ifs >> word;
 		if (word.find("geometry") != string::npos) ifs >> geometry_name;
-
+		if (word.find("geometry") != string::npos) ifs >> geometry_name;
 		if (word.find("layers_x") != string::npos) ifs >> layers_x;
 		if (word.find("layers_y") != string::npos) ifs >> layers_y;
 		if (word.find("curvature") != string::npos) ifs >> Rcurv; 
 		if (word.find("chi_seg") != string::npos) ifs >> chi_seg;
+		if (word.find("branching") != string::npos) ifs >> branch;
+
 	}
 	ifs.close();}
 void System::SetGeometry() {
@@ -59,6 +61,14 @@ void System::SetGeometry() {
 
 		geo = torus;
 	}
+	else if (geometry_name == "sphere") {
+		Sphere sphere;
+		sphere.GetValue(layers_x, layers_y, Rcurv);
+		sphere.AllocateMemory();
+		sphere.UpdateVolume();
+		sphere.UpdateSquareSide();
+		sphere.Transposition();
+	}
 	else {
 		printf("ERROR: unknown geometry\n");
 		return;
@@ -75,14 +85,17 @@ void System::ReadMolecules() {
 			Molecule new_mol;
 			while (word != "[" && ifs.good()) {
 				ifs >> word;
-				if (word.find("Ns") != string::npos) ifs >> new_mol.ns;
-				if (word.find("gen") != string::npos) ifs >> new_mol.num_generation;
+				if (word.find("Ns") != string::npos) ifs >> new_mol.Ns;
+				if (word.find("gen") != string::npos) ifs >> new_mol.Gen;
 				if (word.find("sigma") != string::npos) ifs >> new_mol.sigma;
 				if (word.find("chi") != string::npos) ifs >> new_mol.chi;
 				if (word.find("xmin") != string::npos) ifs >> new_mol.xmin;
 				if (word.find("xmax") != string::npos) ifs >> new_mol.xmax;
 				if (word.find("ymin") != string::npos) ifs >> new_mol.ymin;
 				if (word.find("ymax") != string::npos) ifs >> new_mol.ymax;
+				if (word.find("charge") != string::npos) ifs >> new_mol.v;
+				if (word.find("salt") != string::npos) ifs >> new_mol.fi_salt;
+				if (word.find("branch") != string::npos) ifs >> new_mol.branch;
 			}
 			new_mol.SetParameters();
 			mol.push_back(new_mol);
@@ -125,6 +138,14 @@ void System::ReadMethods() {
 
 }
 
+int System::get_branch() const {
+	return branch;
+}
+
+void System::set_fi_salt(const Molecule &fi_salt) {
+	_fi_salt = fi_salt.get_fi_salt();
+};
+
 void System::Function() {
 	int MM = (layers_x + 2)*(layers_y + 2);
 
@@ -152,27 +173,41 @@ void System::Function() {
 		}
 
 		mol[t].FindGback(geo);
-		mol[t].FindQ(geo);
+		mol[t].FindSum(geo);
 		mol[t].FindFiP();
 		mol[t].FindFiSide(geo);
 	}
+
+	
+	FindVolumeRatioSolv();
 	FindFiSolv();
 	FindFiTotal();
 	FindFiSide();
+	FindCharge(geo);
+	ElectrostaticPotential();
+	PoissonBoltzmannEquation();
 	
 	for (int t = 0; t < mol.size(); ++t) {
 		FindLagrangeMultipliers(t);
 	}
 	FindLagrangeMultipliers();
+
 	FindGrad();
 };
 
+void System::FindVolumeRatioSolv() {
 
+	for (int i = 1; i < layers_x + 1; ++i) {
+		for (int j = 1; j < layers_y + 1; ++j)
+			fi_solv[i][j] = 1-2*_fi_salt;
+	}
+
+}
 
 void System::FindFiSolv() {
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int j = 1; j < layers_y + 1; ++j)
-			fi_solv[i][j]= exp(-u[i*(layers_y + 2) + j]);
+			fi_solv[i][j]=fi_solv[i][j]*exp(-u[i*(layers_y + 2) + j]);
 	}
 }
 
@@ -251,6 +286,44 @@ void System::FindFiSide() {
 	}
 }
 
+
+void System::FindCharge(Geometry geo) {
+
+	vector<vector<double>> sum;
+
+	for (int k = 0; k < mol.size(); ++k) {
+		for (int i = 1; i < layers_x + 1; ++i) {
+			for (int j = 1; j < layers_y + 1; ++j) {
+				sum[i][j] = mol[k].v*mol[k].fi_p[i][j];
+			}
+		}
+	}
+
+	for (int i = 1; i < layers_x + 1; ++i) {
+		for (int j = 1; j < layers_y + 1; ++j) {
+			q[i][j] = (mol[0].fi_p[i][j] + mol[1].fi_p[i][j] + sum[i][j])*geo.volume[i][j];
+		}
+	}
+
+};
+
+void System::ElectrostaticPotential() {
+	for (int i = 1; i < layers_x + 1; ++i) {
+		for (int j = 1; j < layers_y + 1; ++j) {
+			ksi_0[i][j] = ksi[i][j];
+		}
+	}
+};
+
+void System::PoissonBoltzmannEquation() {
+
+	for (int i = 1; i < layers_x + 2; ++i) {
+		for (int j = 1; j < layers_y + 2; ++j) {
+			ksi[i][j] = 0.5*(f_n*q[i][j]+ksi_0[i+1][j]*(1+1/2*i)+ksi_0[i-1][j]*(1-1/2*i)+ksi_0[i][j+1])+(ksi_0[i][j+1]-2*ksi_0[i][j]+ksi_0[i][j-1])/2*i*i;
+		}
+	}
+};
+
 void System::FindLagrangeMultipliers(int t) {
 	int t2 = -1;
 	for (int t1 = 0; t1 < mol.size(); ++t1) {
@@ -281,14 +354,16 @@ void System::FindGrad() {
 	int MM = (layers_x + 2)*(layers_y + 2);
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int j = 1; j < layers_y + 1; ++j)
-			middle_multipliers[i][j] = (mol[0].multipliers[i][j] + mol[1].multipliers[i][j] + multipliers[i][j])/3.0;
+			middle_multipliers[i][j] = (mol[0].multipliers[i][j] + mol[1].multipliers[i][j] + multipliers[i][j]) / 3.0;
 	}
-	for (int t = 0; t < mol.size(); ++t) {
+
+	for (int t = 0; t < mol.size(); ++t){
 		for (int i = 1; i < layers_x + 1; ++i) {
 			for (int j = 1; j < layers_y + 1; ++j)
-				grad[i*(layers_y + 2) + j + (t + 1)*MM] = 1 - 1.0 / fi_total[i][j] + middle_multipliers[i][j] - mol[t].multipliers[i][j];
+				grad[i*(layers_y + 2) + j + (t+1)*MM] = 1 - 1.0 / fi_total[i][j] + middle_multipliers[i][j] - mol[t].multipliers[i][j] +  mol[t].v*ksi[i][j];
 		}
 	}
+	
 	for (int i = 1; i < layers_x + 1; ++i) {
 		for (int j = 1; j < layers_y + 1; ++j)
 			grad[i*(layers_y + 2) + j] = 1 - 1.0 / fi_total[i][j] + middle_multipliers[i][j] - multipliers[i][j];

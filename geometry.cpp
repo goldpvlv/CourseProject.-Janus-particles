@@ -108,7 +108,10 @@ void Torus::UpdateVolume() {
 	}
 	for (int i = 1; i < Mx + 1; i++) {
 		for (int j = 1; j < My + 1; j++) {
-			volume[i][j] = square_up[i][j] * pi * 2.0*(R0 + rho[i] * cos(((2 * j - 1) / 2.0)*delta_alpha));}}};
+			volume[i][j] = square_up[i][j] * pi * 2.0*(R0 + rho[i] * cos(((2 * j - 1) / 2.0)*delta_alpha));
+		}
+	}
+};
 
 void Torus::UpdateSquareUp() {
 	for (int i = 1; i < Mx + 1; i++)
@@ -148,4 +151,45 @@ void Torus::Transposition() {
 			lambda_nf[i][j] = prob * square_right[i][j] / sum;
 		}
 	}
+};
+
+void Sphere::UpdateSquareSide() {
+
+	for (int i = 1; i < Mx + 1; ++i) {
+		for (int j = 1; j < My + 1; ++j) {
+			square_side[i][j] = 4 * pi*(i + R0)*(i + R0);
+		}
+	}
+}
+
+
+void Sphere::UpdateVolume() {
+	
+	for (int i = 1; i < Mx + 1; i++) {
+		for (int j = 1; j < My + 1; j++) {
+			volume[i][j] = 1.3333*pi*(3 * (i + R0)*(i + R0) - 3 * (i + R0) + 1);
+		}
+	}
+};
+
+void Sphere::Transposition() {
+
+	for (int i = 1; i < Mx + 1; ++i) {
+		for (int j = 1; j < My + 1; ++j) {
+			
+			lambda_bb[i][j] = 0;
+			lambda_bn[i][j] = square_side[i - 1][j] / volume[i][j] * 1.0 / 6.0;
+			lambda_bf[i][j] = 0.0;
+
+			lambda_fb[i][j] = 0.0;
+			lambda_fn[i][j] = square_side[i][j] / volume[i][j] * 1.0 / 6.0;
+			lambda_ff[i][j] = 0.0;
+
+			lambda_nb[i][j] = 0.0;
+			lambda_nn[i][j] = 1-lambda_bn[i][j]-lambda_fn[i][j];
+			lambda_nf[i][j] = 0.0;
+
+		}
+	}
+	
 };
